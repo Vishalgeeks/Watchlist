@@ -26,6 +26,8 @@ func main() {
 	// ── Routes ────────────────────────────────
 	r := gin.Default()
 
+	//creating api and callits handlers
+
 	api := r.Group("/api")
 	{
 		api.POST("/watchlists", watchlistHandler.Create)
