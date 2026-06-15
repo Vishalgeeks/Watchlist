@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS users;
 
 -- Recreate with integer IDs
 CREATE TABLE IF NOT EXISTS users (
-    id         SERIAL PRIMARY KEY,        -- auto increment integer
+    id         SERIAL PRIMARY KEY,
     name       VARCHAR(100) NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );
