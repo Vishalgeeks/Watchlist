@@ -2,9 +2,8 @@ package watchlist
 
 import (
 	"errors"
+	"strconv"
 	"watchlist-backend/pkg/models"
-
-	"github.com/google/uuid"
 )
 
 type Service struct {
@@ -15,9 +14,8 @@ func NewService(repo *Repository) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) CreateWatchlist(userID, name string) (*models.Watchlist, error) {
+func (s *Service) CreateWatchlist(userID int, name string) (*models.Watchlist, error) {
 	w := &models.Watchlist{
-		ID:     uuid.New().String(),
 		UserID: userID,
 		Name:   name,
 	}
@@ -27,11 +25,11 @@ func (s *Service) CreateWatchlist(userID, name string) (*models.Watchlist, error
 	return w, nil
 }
 
-func (s *Service) GetWatchlists(userID string) ([]models.Watchlist, error) {
+func (s *Service) GetWatchlists(userID int) ([]models.Watchlist, error) {
 	return s.repo.GetAllByUserID(userID)
 }
 
-func (s *Service) DeleteWatchlist(userID, watchlistID string) error {
+func (s *Service) DeleteWatchlist(userID, watchlistID int) error {
 	w, err := s.repo.GetByID(watchlistID)
 	if err != nil {
 		return err
@@ -42,7 +40,7 @@ func (s *Service) DeleteWatchlist(userID, watchlistID string) error {
 	return s.repo.Delete(watchlistID)
 }
 
-func (s *Service) GetStocks(userID, watchlistID string) ([]models.WatchlistItem, error) {
+func (s *Service) GetStocks(userID, watchlistID int) ([]models.WatchlistItem, error) {
 	w, err := s.repo.GetByID(watchlistID)
 	if err != nil {
 		return nil, err
@@ -53,7 +51,7 @@ func (s *Service) GetStocks(userID, watchlistID string) ([]models.WatchlistItem,
 	return s.repo.GetStocks(watchlistID)
 }
 
-func (s *Service) AddStock(userID, watchlistID, stockID string) error {
+func (s *Service) AddStock(userID, watchlistID, stockID int) error {
 	w, err := s.repo.GetByID(watchlistID)
 	if err != nil {
 		return err
@@ -68,10 +66,10 @@ func (s *Service) AddStock(userID, watchlistID, stockID string) error {
 	if exists {
 		return errors.New("stock already in watchlist")
 	}
-	return s.repo.AddStock(watchlistID, stockID, uuid.New().String())
+	return s.repo.AddStock(watchlistID, stockID)
 }
 
-func (s *Service) RemoveStock(userID, watchlistID, stockID string) error {
+func (s *Service) RemoveStock(userID, watchlistID, stockID int) error {
 	w, err := s.repo.GetByID(watchlistID)
 	if err != nil {
 		return err
@@ -80,4 +78,13 @@ func (s *Service) RemoveStock(userID, watchlistID, stockID string) error {
 		return errors.New("unauthorized")
 	}
 	return s.repo.RemoveStock(watchlistID, stockID)
+}
+
+// String to Int helper
+func ParseInt(s string) (int, error) {
+	val, err := strconv.Atoi(s)
+	if err != nil {
+		return 0, errors.New("invalid id format")
+	}
+	return val, nil
 }

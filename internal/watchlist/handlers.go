@@ -19,30 +19,55 @@ func NewHandler(service *Service) *Handler {
 func (h *Handler) Create(c *gin.Context) {
 	var req models.CreateWatchlistRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: err.Error(),
+		})
 		return
 	}
 
 	w, err := h.service.CreateWatchlist(req.UserID, req.Name)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create watchlist"})
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Success: false,
+			Message: "failed to create watchlist",
+		})
 		return
 	}
 
-	c.JSON(http.StatusCreated, w)
+	c.JSON(http.StatusCreated, models.Response{
+		Success: true,
+		Message: "watchlist created successfully",
+		Data:    w,
+	})
 }
 
-// GET /api/watchlists?user_id=xxx
+// GET /api/watchlists?user_id=1
 func (h *Handler) GetAll(c *gin.Context) {
-	userID := c.Query("user_id")
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id required"})
+	userIDStr := c.Query("user_id")
+	if userIDStr == "" {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: "user_id required",
+		})
+		return
+	}
+
+	userID, err := ParseInt(userIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: "invalid user_id",
+		})
 		return
 	}
 
 	watchlists, err := h.service.GetWatchlists(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch watchlists"})
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Success: false,
+			Message: "failed to fetch watchlists",
+		})
 		return
 	}
 
@@ -50,56 +75,123 @@ func (h *Handler) GetAll(c *gin.Context) {
 		watchlists = []models.Watchlist{}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"watchlists": watchlists})
+	c.JSON(http.StatusOK, models.Response{
+		Success: true,
+		Message: "watchlists fetched successfully",
+		Data:    watchlists,
+	})
 }
 
-// DELETE /api/watchlists/:id?user_id=xxx
+// DELETE /api/watchlists/:id?user_id=1
 func (h *Handler) Delete(c *gin.Context) {
-	watchlistID := c.Param("id")
-	userID := c.Query("user_id")
+	watchlistIDStr := c.Param("id")
+	userIDStr := c.Query("user_id")
 
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id required"})
+	if userIDStr == "" {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: "user_id required",
+		})
+		return
+	}
+
+	watchlistID, err := ParseInt(watchlistIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: "invalid watchlist id",
+		})
+		return
+	}
+
+	userID, err := ParseInt(userIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: "invalid user_id",
+		})
 		return
 	}
 
 	if err := h.service.DeleteWatchlist(userID, watchlistID); err != nil {
 		if err.Error() == "unauthorized" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "unauthorized"})
+			c.JSON(http.StatusForbidden, models.Response{
+				Success: false,
+				Message: "unauthorized",
+			})
 			return
 		}
 		if err.Error() == "watchlist not found" {
-			c.JSON(http.StatusNotFound, gin.H{"error": "watchlist not found"})
+			c.JSON(http.StatusNotFound, models.Response{
+				Success: false,
+				Message: "watchlist not found",
+			})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Success: false,
+			Message: err.Error(),
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "watchlist deleted"})
+	c.JSON(http.StatusOK, models.Response{
+		Success: true,
+		Message: "watchlist deleted successfully",
+	})
 }
 
-// GET /api/watchlists/:id/stocks?user_id=xxx
+// GET /api/watchlists/:id/stocks?user_id=1
 func (h *Handler) GetStocks(c *gin.Context) {
-	watchlistID := c.Param("id")
-	userID := c.Query("user_id")
+	watchlistIDStr := c.Param("id")
+	userIDStr := c.Query("user_id")
 
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id required"})
+	if userIDStr == "" {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: "user_id required",
+		})
+		return
+	}
+
+	watchlistID, err := ParseInt(watchlistIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: "invalid watchlist id",
+		})
+		return
+	}
+
+	userID, err := ParseInt(userIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: "invalid user_id",
+		})
 		return
 	}
 
 	items, err := h.service.GetStocks(userID, watchlistID)
 	if err != nil {
 		if err.Error() == "unauthorized" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "unauthorized"})
+			c.JSON(http.StatusForbidden, models.Response{
+				Success: false,
+				Message: "unauthorized",
+			})
 			return
 		}
 		if err.Error() == "watchlist not found" {
-			c.JSON(http.StatusNotFound, gin.H{"error": "watchlist not found"})
+			c.JSON(http.StatusNotFound, models.Response{
+				Success: false,
+				Message: "watchlist not found",
+			})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Success: false,
+			Message: err.Error(),
+		})
 		return
 	}
 
@@ -107,68 +199,153 @@ func (h *Handler) GetStocks(c *gin.Context) {
 		items = []models.WatchlistItem{}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"stocks": items})
+	c.JSON(http.StatusOK, models.Response{
+		Success: true,
+		Message: "stocks fetched successfully",
+		Data:    items,
+	})
 }
 
-// POST /api/watchlists/:id/stocks?user_id=xxx
+// POST /api/watchlists/:id/stocks?user_id=1
 func (h *Handler) AddStock(c *gin.Context) {
-	watchlistID := c.Param("id")
-	userID := c.Query("user_id")
+	watchlistIDStr := c.Param("id")
+	userIDStr := c.Query("user_id")
 
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id required"})
+	if userIDStr == "" {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: "user_id required",
+		})
+		return
+	}
+
+	watchlistID, err := ParseInt(watchlistIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: "invalid watchlist id",
+		})
+		return
+	}
+
+	userID, err := ParseInt(userIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: "invalid user_id",
+		})
 		return
 	}
 
 	var req models.AddStockRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: err.Error(),
+		})
 		return
 	}
 
 	if err := h.service.AddStock(userID, watchlistID, req.StockID); err != nil {
 		if err.Error() == "unauthorized" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "unauthorized"})
+			c.JSON(http.StatusForbidden, models.Response{
+				Success: false,
+				Message: "unauthorized",
+			})
 			return
 		}
 		if err.Error() == "watchlist not found" {
-			c.JSON(http.StatusNotFound, gin.H{"error": "watchlist not found"})
+			c.JSON(http.StatusNotFound, models.Response{
+				Success: false,
+				Message: "watchlist not found",
+			})
 			return
 		}
 		if err.Error() == "stock already in watchlist" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "stock already in watchlist"})
+			c.JSON(http.StatusBadRequest, models.Response{
+				Success: false,
+				Message: "stock already in watchlist",
+			})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Success: false,
+			Message: err.Error(),
+		})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "stock added to watchlist"})
+	c.JSON(http.StatusCreated, models.Response{
+		Success: true,
+		Message: "stock added to watchlist successfully",
+	})
 }
 
-// DELETE /api/watchlists/:id/stocks/:stockId?user_id=xxx
+// DELETE /api/watchlists/:id/stocks/:stockId?user_id=1
 func (h *Handler) RemoveStock(c *gin.Context) {
-	watchlistID := c.Param("id")
-	stockID := c.Param("stockId")
-	userID := c.Query("user_id")
+	watchlistIDStr := c.Param("id")
+	stockIDStr := c.Param("stockId")
+	userIDStr := c.Query("user_id")
 
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id required"})
+	if userIDStr == "" {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: "user_id required",
+		})
+		return
+	}
+
+	watchlistID, err := ParseInt(watchlistIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: "invalid watchlist id",
+		})
+		return
+	}
+
+	userID, err := ParseInt(userIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: "invalid user_id",
+		})
+		return
+	}
+
+	stockID, err := ParseInt(stockIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Success: false,
+			Message: "invalid stock id",
+		})
 		return
 	}
 
 	if err := h.service.RemoveStock(userID, watchlistID, stockID); err != nil {
 		if err.Error() == "unauthorized" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "unauthorized"})
+			c.JSON(http.StatusForbidden, models.Response{
+				Success: false,
+				Message: "unauthorized",
+			})
 			return
 		}
 		if err.Error() == "watchlist not found" {
-			c.JSON(http.StatusNotFound, gin.H{"error": "watchlist not found"})
+			c.JSON(http.StatusNotFound, models.Response{
+				Success: false,
+				Message: "watchlist not found",
+			})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Success: false,
+			Message: err.Error(),
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "stock removed"})
+	c.JSON(http.StatusOK, models.Response{
+		Success: true,
+		Message: "stock removed successfully",
+	})
 }

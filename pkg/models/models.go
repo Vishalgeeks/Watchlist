@@ -4,14 +4,14 @@ import "time"
 
 // ── User ──────────────────────────────────────────────
 type User struct {
-	ID        string    `json:"id"`
+	ID        int       `json:"id"`
 	Name      string    `json:"name"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
 // ── Stock ─────────────────────────────────────────────
 type Stock struct {
-	ID           string    `json:"id"`
+	ID           int       `json:"id"`
 	Symbol       string    `json:"symbol"`
 	CompanyName  string    `json:"company_name"`
 	Exchange     string    `json:"exchange"`
@@ -21,8 +21,8 @@ type Stock struct {
 
 // ── Watchlist ─────────────────────────────────────────
 type Watchlist struct {
-	ID         string    `json:"id"`
-	UserID     string    `json:"user_id"`
+	ID         int       `json:"id"`
+	UserID     int       `json:"user_id"`
 	Name       string    `json:"name"`
 	CreatedAt  time.Time `json:"created_at"`
 	StockCount int       `json:"stock_count"`
@@ -30,19 +30,26 @@ type Watchlist struct {
 
 // ── Watchlist Item ────────────────────────────────────
 type WatchlistItem struct {
-	ID          string    `json:"id"`
-	WatchlistID string    `json:"watchlist_id"`
-	StockID     string    `json:"stock_id"`
+	ID          int       `json:"id"`
+	WatchlistID int       `json:"watchlist_id"`
+	StockID     int       `json:"stock_id"`
 	AddedAt     time.Time `json:"added_at"`
 	Stock       *Stock    `json:"stock,omitempty"`
 }
 
 // ── Request DTOs ──────────────────────────────────────
 type CreateWatchlistRequest struct {
-	UserID string `json:"user_id" binding:"required"`
+	UserID int    `json:"user_id" binding:"required"`
 	Name   string `json:"name"    binding:"required,min=1,max=100"`
 }
 
 type AddStockRequest struct {
-	StockID string `json:"stock_id" binding:"required"`
+	StockID int `json:"stock_id" binding:"required"`
+}
+
+// ── Standard Response ─────────────────────────────────
+type Response struct {
+	Success bool        `json:"success"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data,omitempty"`
 }

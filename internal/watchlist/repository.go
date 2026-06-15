@@ -14,18 +14,16 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{db: db}
 }
 
-// jab new watchlisty bne
 func (r *Repository) Create(w *models.Watchlist) error {
 	query := `
-		INSERT INTO watchlists (id, user_id, name, created_at)
-		VALUES ($1, $2, $3, NOW())
+		INSERT INTO watchlists (user_id, name, created_at)
+		VALUES ($1, $2, NOW())
+		RETURNING id
 	`
-	_, err := r.db.Exec(query, w.ID, w.UserID, w.Name)
-	return err
+	return r.db.QueryRow(query, w.UserID, w.Name).Scan(&w.ID)
 }
 
-// uss id ki sari watchlist showing
-func (r *Repository) GetAllByUserID(userID string) ([]models.Watchlist, error) {
+func (r *Repository) GetAllByUserID(userID int) ([]models.Watchlist, error) {
 	query := `
 		SELECT w.id, w.user_id, w.name, w.created_at,
 		       COUNT(wi.id) as stock_count
@@ -52,8 +50,7 @@ func (r *Repository) GetAllByUserID(userID string) ([]models.Watchlist, error) {
 	return watchlists, nil
 }
 
-// ek specific wtchlist showing
-func (r *Repository) GetByID(watchlistID string) (*models.Watchlist, error) {
+func (r *Repository) GetByID(watchlistID int) (*models.Watchlist, error) {
 	query := `SELECT id, user_id, name, created_at FROM watchlists WHERE id = $1`
 	w := &models.Watchlist{}
 	err := r.db.QueryRow(query, watchlistID).Scan(&w.ID, &w.UserID, &w.Name, &w.CreatedAt)
@@ -63,14 +60,12 @@ func (r *Repository) GetByID(watchlistID string) (*models.Watchlist, error) {
 	return w, err
 }
 
-// watchlist delete
-func (r *Repository) Delete(watchlistID string) error {
+func (r *Repository) Delete(watchlistID int) error {
 	_, err := r.db.Exec(`DELETE FROM watchlists WHERE id = $1`, watchlistID)
 	return err
 }
 
-// fetching stock of that watchlist
-func (r *Repository) GetStocks(watchlistID string) ([]models.WatchlistItem, error) {
+func (r *Repository) GetStocks(watchlistID int) ([]models.WatchlistItem, error) {
 	query := `
 		SELECT
 			wi.id, wi.watchlist_id, wi.stock_id, wi.added_at,
@@ -104,19 +99,16 @@ func (r *Repository) GetStocks(watchlistID string) ([]models.WatchlistItem, erro
 	return items, nil
 }
 
-// adding stocks to the watchlist
-func (r *Repository) AddStock(watchlistID, stockID, itemID string) error {
+func (r *Repository) AddStock(watchlistID, stockID int) error {
 	query := `
-		INSERT INTO watchlist_items (id, watchlist_id, stock_id, added_at)
-		VALUES ($1, $2, $3, NOW())
+		INSERT INTO watchlist_items (watchlist_id, stock_id, added_at)
+		VALUES ($1, $2, NOW())
 	`
-	_, err := r.db.Exec(query, itemID, watchlistID, stockID)
+	_, err := r.db.Exec(query, watchlistID, stockID)
 	return err
 }
 
-//deleting stocks to the watchlist
-
-func (r *Repository) RemoveStock(watchlistID, stockID string) error {
+func (r *Repository) RemoveStock(watchlistID, stockID int) error {
 	_, err := r.db.Exec(
 		`DELETE FROM watchlist_items WHERE watchlist_id = $1 AND stock_id = $2`,
 		watchlistID, stockID,
@@ -124,9 +116,7 @@ func (r *Repository) RemoveStock(watchlistID, stockID string) error {
 	return err
 }
 
-//checking ki duplicate to ni h ni h n
-
-func (r *Repository) StockExists(watchlistID, stockID string) (bool, error) {
+func (r *Repository) StockExists(watchlistID, stockID int) (bool, error) {
 	var count int
 	err := r.db.QueryRow(
 		`SELECT COUNT(*) FROM watchlist_items WHERE watchlist_id = $1 AND stock_id = $2`,
