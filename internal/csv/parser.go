@@ -2,21 +2,22 @@ package csv
 
 import (
 	"encoding/csv"
-	"os"
+	"net/http"
 	"strconv"
 	"strings"
 	"watchlist-backend/pkg/models"
 )
 
-func ParseCSV(filePath string) ([]models.Stock, error) {
-	file, err := os.Open(filePath)
+func ParseCSV(url string) ([]models.Stock, error) {
+	// URL se CSV fetch karo
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer resp.Body.Close()
 
-	reader := csv.NewReader(file)
-	reader.Comma = '\t' // Tab separated hai CSV
+	reader := csv.NewReader(resp.Body)
+	reader.Comma = '\t'
 	reader.LazyQuotes = true
 
 	// Header skip karo
@@ -32,7 +33,6 @@ func ParseCSV(filePath string) ([]models.Stock, error) {
 			break
 		}
 
-		// Row mein enough columns hain?
 		if len(row) < 32 {
 			continue
 		}
@@ -55,7 +55,6 @@ func ParseCSV(filePath string) ([]models.Stock, error) {
 			CautionaryMessageInfo: strings.TrimSpace(row[31]),
 		}
 
-		// Float fields
 		stock.Strike = parseFloat(row[10])
 		stock.TickSize = parseFloat(row[15])
 		stock.UpperCircuit = parseFloat(row[16])
@@ -67,14 +66,10 @@ func ParseCSV(filePath string) ([]models.Stock, error) {
 		stock.Close = parseFloat(row[24])
 		stock.Bid = parseFloat(row[27])
 		stock.Ask = parseFloat(row[28])
-
-		// Int fields
 		stock.LotSize = parseInt(row[14])
 		stock.FreezeQty = parseInt(row[18])
 		stock.BidQty = parseInt(row[29])
 		stock.AskQty = parseInt(row[30])
-
-		// BigInt fields
 		stock.Vol = parseInt64(row[25])
 		stock.OI = parseInt64(row[26])
 
