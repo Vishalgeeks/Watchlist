@@ -2,34 +2,47 @@ package main
 
 import (
 	"log"
+
+	"github.com/gin-gonic/gin"
+
 	"watchlist-backend/config"
 	"watchlist-backend/internal/db"
 	"watchlist-backend/internal/watchlist"
-
-	"github.com/gin-gonic/gin"
+	"watchlist-backend/internal/stock"
+	"watchlist-backend/internal/middleware"
 )
 
 func main() {
 	cfg := config.Load()
+
 	database := db.Connect(cfg.DBConnectionString())
 	defer database.Close()
 
-	// ── Repositories ──────────────────────────
+	// Repositories
 	watchlistRepo := watchlist.NewRepository(database)
+	stockRepo := stock.NewRepository(database)
 
-	// ── Services ──────────────────────────────
+	// Services
 	watchlistService := watchlist.NewService(watchlistRepo)
+	stockService := stock.NewService(stockRepo)
 
-	// ── Handlers ──────────────────────────────
+	// Handlers
 	watchlistHandler := watchlist.NewHandler(watchlistService)
+	stockHandler := stock.NewHandler(stockService)
 
-	// ── Routes ────────────────────────────────
+	// Router
 	r := gin.Default()
-
-	//creating api and callits handlers
+	r.Use(middleware.CORSMiddleware())
+	r.OPTIONS("/*path", func(c *gin.Context) {
+	c.Status(204)
+})
 
 	api := r.Group("/api")
 	{
+		// STOCK ROUTES (THIS WAS MISSING)
+		stockHandler.RegisterRoutes(api)
+
+		// Watchlist routes
 		api.POST("/watchlists", watchlistHandler.Create)
 		api.GET("/watchlists", watchlistHandler.GetAll)
 		api.DELETE("/watchlists/:id", watchlistHandler.Delete)
@@ -39,5 +52,6 @@ func main() {
 	}
 
 	log.Printf("Server running on port %s", cfg.ServerPort)
+
 	r.Run(":" + cfg.ServerPort)
 }
