@@ -12,12 +12,40 @@ type User struct {
 
 // ── Stock ─────────────────────────────────────────────
 type Stock struct {
-	ID           int       `json:"id"`
-	Symbol       string    `json:"symbol"`
-	CompanyName  string    `json:"company_name"`
-	Exchange     string    `json:"exchange"`
-	CurrentPrice float64   `json:"current_price"`
-	LastUpdated  time.Time `json:"last_updated"`
+	ID                    int       `json:"id"`
+	ExchangeInstrumentID  string    `json:"exchange_instrument_id"`
+	Segment               string    `json:"segment"`
+	InstrumentType        string    `json:"instrument_type"`
+	Symbol                string    `json:"symbol"`
+	DisplayName           string    `json:"display_name"`
+	CompanyName           string    `json:"company_name"`
+	ISIN                  string    `json:"isin"`
+	Series                string    `json:"series"`
+	Exchange              string    `json:"exchange"`
+	ContractExpiration    string    `json:"contract_expiration"`
+	Strike                float64   `json:"strike"`
+	OptionType            string    `json:"option_type"`
+	UnderlyingSymbolID    string    `json:"underlying_symbol_id"`
+	UnderlyingSymbol      string    `json:"underlying_symbol"`
+	LotSize               int       `json:"lot_size"`
+	TickSize              float64   `json:"tick_size"`
+	UpperCircuit          float64   `json:"upper_circuit"`
+	LowerCircuit          float64   `json:"lower_circuit"`
+	FreezeQty             int       `json:"freeze_qty"`
+	Description           string    `json:"description"`
+	LTP                   float64   `json:"ltp"`
+	Open                  float64   `json:"open"`
+	High                  float64   `json:"high"`
+	Low                   float64   `json:"low"`
+	Close                 float64   `json:"close"`
+	Vol                   int64     `json:"vol"`
+	OI                    int64     `json:"oi"`
+	Bid                   float64   `json:"bid"`
+	Ask                   float64   `json:"ask"`
+	BidQty                int       `json:"bid_qty"`
+	AskQty                int       `json:"ask_qty"`
+	CautionaryMessageInfo string    `json:"cautionary_message_info"`
+	LastUpdated           time.Time `json:"last_updated"`
 }
 
 // ── Watchlist ─────────────────────────────────────────
