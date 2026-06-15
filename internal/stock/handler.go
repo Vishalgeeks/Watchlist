@@ -32,7 +32,7 @@ func toStockResponse(s models.Stock) StockResponse {
 		Symbol:       s.Symbol,
 		CompanyName:  s.CompanyName,
 		Exchange:     s.Exchange,
-		CurrentPrice: s.CurrentPrice,
+		CurrentPrice: s.LTP,
 		LastUpdated:  s.LastUpdated.Format("2006-01-02 15:04:05"),
 	}
 }

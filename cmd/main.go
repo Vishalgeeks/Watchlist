@@ -7,6 +7,7 @@ import (
 
 	"watchlist-backend/config"
 	"watchlist-backend/internal/auth"
+	csvhandler "watchlist-backend/internal/csv"
 	"watchlist-backend/internal/db"
 	"watchlist-backend/internal/middleware"
 	"watchlist-backend/internal/stock"
@@ -27,14 +28,26 @@ func main() {
 	// Watchlist
 	watchlistRepo := watchlist.NewRepository(database)
 	watchlistService := watchlist.NewService(watchlistRepo)
+	watchlistHandler := watchlist.NewHandler(watchlistService)
 
 	// Stock
 	stockRepo := stock.NewRepository(database)
 	stockService := stock.NewService(stockRepo)
-
-	// Handlers
-	watchlistHandler := watchlist.NewHandler(watchlistService)
 	stockHandler := stock.NewHandler(stockService)
+
+	// CSV
+	csvRepo := csvhandler.NewRepository(database)
+	csvHandler := csvhandler.NewHandler(csvRepo, cfg.CSVURL)
+
+	// Server start hote hi CSV load karo
+	go func() {
+		log.Println("Loading CSV data from URL...")
+		if err := csvRepo.LoadFromURL(cfg.CSVURL); err != nil {
+			log.Printf("CSV load error: %v", err)
+		} else {
+			log.Println("CSV data loaded successfully!")
+		}
+	}()
 
 	// Router
 	r := gin.Default()
@@ -58,6 +71,9 @@ func main() {
 	// Stock Routes
 	stockHandler.RegisterRoutes(api)
 
+	// CSV Import Route
+	api.POST("/stocks/import", csvHandler.ImportCSV)
+
 	// Protected Routes
 	protected := api.Group("/")
 	protected.Use(middleware.AuthMiddleware(cfg.JWTSecret))
@@ -71,6 +87,5 @@ func main() {
 	}
 
 	log.Printf("Server running on port %s", cfg.ServerPort)
-
 	r.Run(":" + cfg.ServerPort)
 }

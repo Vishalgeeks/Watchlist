@@ -88,7 +88,7 @@ func (r *Repository) GetStocks(watchlistID int) ([]models.WatchlistItem, error) 
 		err := rows.Scan(
 			&item.ID, &item.WatchlistID, &item.StockID, &item.AddedAt,
 			&stock.ID, &stock.Symbol, &stock.CompanyName,
-			&stock.Exchange, &stock.CurrentPrice, &stock.LastUpdated,
+			&stock.Exchange, &stock.LTP, &stock.LastUpdated,
 		)
 		if err != nil {
 			return nil, err

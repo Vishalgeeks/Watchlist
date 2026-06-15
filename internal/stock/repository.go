@@ -27,7 +27,7 @@ func (r *Repository) Create(stock *models.Stock) error {
 		stock.Symbol,
 		stock.CompanyName,
 		stock.Exchange,
-		stock.CurrentPrice,
+		stock.LTP,
 	).Scan(&stock.ID, &stock.LastUpdated)
 }
 
@@ -55,7 +55,7 @@ func (r *Repository) GetAll() ([]models.Stock, error) {
 			&s.Symbol,
 			&s.CompanyName,
 			&s.Exchange,
-			&s.CurrentPrice,
+			&s.LTP,
 			&s.LastUpdated,
 		)
 
@@ -84,7 +84,7 @@ func (r *Repository) GetByID(id string) (*models.Stock, error) {
 		&stock.Symbol,
 		&stock.CompanyName,
 		&stock.Exchange,
-		&stock.CurrentPrice,
+		&stock.LTP,
 		&stock.LastUpdated,
 	)
 
@@ -112,7 +112,7 @@ func (r *Repository) Update(id string, stock *models.Stock) error {
 		stock.Symbol,
 		stock.CompanyName,
 		stock.Exchange,
-		stock.CurrentPrice,
+		stock.LTP,
 		id,
 	).Scan(&stock.LastUpdated)
 }
