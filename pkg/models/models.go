@@ -6,6 +6,7 @@ import "time"
 type User struct {
 	ID        int       `json:"id"`
 	Name      string    `json:"name"`
+	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -37,10 +38,26 @@ type WatchlistItem struct {
 	Stock       *Stock    `json:"stock,omitempty"`
 }
 
-// ── Request DTOs ──────────────────────────────────────
+// ── Auth Request DTOs ─────────────────────────────────
+type RegisterRequest struct {
+	Name     string `json:"name"     binding:"required"`
+	Email    string `json:"email"    binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6"`
+}
+
+type LoginRequest struct {
+	Email    string `json:"email"    binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
+type AuthResponse struct {
+	Token string `json:"token"`
+	User  User   `json:"user"`
+}
+
+// ── Watchlist Request DTOs ────────────────────────────
 type CreateWatchlistRequest struct {
-	UserID int    `json:"user_id" binding:"required"`
-	Name   string `json:"name"    binding:"required,min=1,max=100"`
+	Name string `json:"name" binding:"required,min=1,max=100"`
 }
 
 type AddStockRequest struct {
