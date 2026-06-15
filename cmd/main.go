@@ -9,6 +9,7 @@ import (
 	"watchlist-backend/internal/db"
 	"watchlist-backend/internal/watchlist"
 	"watchlist-backend/internal/stock"
+	"watchlist-backend/internal/middleware"
 )
 
 func main() {
@@ -31,10 +32,14 @@ func main() {
 
 	// Router
 	r := gin.Default()
+	r.Use(middleware.CORSMiddleware())
+	r.OPTIONS("/*path", func(c *gin.Context) {
+	c.Status(204)
+})
 
 	api := r.Group("/api")
 	{
-		// ✅ STOCK ROUTES (THIS WAS MISSING)
+		// STOCK ROUTES (THIS WAS MISSING)
 		stockHandler.RegisterRoutes(api)
 
 		// Watchlist routes
