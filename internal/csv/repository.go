@@ -13,6 +13,17 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{db: db}
 }
 
+func (r *Repository) LoadFromURL(url string) error {
+	stocks, err := ParseCSV(url)
+	if err != nil {
+		return err
+	}
+	for _, stock := range stocks {
+		r.UpsertStock(&stock)
+	}
+	return nil
+}
+
 // UPSERT — agar symbol exist karta hai toh update, nahi toh insert
 func (r *Repository) UpsertStock(s *models.Stock) error {
 	query := `
