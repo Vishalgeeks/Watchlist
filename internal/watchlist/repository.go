@@ -69,7 +69,7 @@ func (r *Repository) GetStocks(watchlistID int) ([]models.WatchlistItem, error) 
 	query := `
 		SELECT
 			wi.id, wi.watchlist_id, wi.stock_id, wi.added_at,
-			s.id, s.symbol, s.company_name, s.exchange, s.current_price, s.last_updated
+			s.id, s.symbol, s.company_name, s.exchange, s.ltp, s.last_updated
 		FROM watchlist_items wi
 		JOIN stocks s ON s.id = wi.stock_id
 		WHERE wi.watchlist_id = $1

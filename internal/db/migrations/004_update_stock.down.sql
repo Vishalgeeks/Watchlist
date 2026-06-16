@@ -8,6 +8,6 @@ CREATE TABLE IF NOT EXISTS stocks (
     symbol        VARCHAR(20) UNIQUE NOT NULL,
     company_name  VARCHAR(255) NOT NULL,
     exchange      VARCHAR(50),
-    current_price DECIMAL(12,2) DEFAULT 0.00,
+    ltp DECIMAL(12,2) DEFAULT 0.00,
     last_updated  TIMESTAMP DEFAULT NOW()
 );

@@ -13,7 +13,7 @@ type StockResponse struct {
 	Symbol       string  `json:"symbol"`
 	CompanyName  string  `json:"company_name"`
 	Exchange     string  `json:"exchange"`
-	CurrentPrice float64 `json:"current_price"`
+	CurrentPrice float64 `json:"ltp"`
 	Sector       string  `json:"sector,omitempty"`
 	LastUpdated  string  `json:"last_updated"`
 }

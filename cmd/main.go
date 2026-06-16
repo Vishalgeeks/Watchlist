@@ -42,11 +42,19 @@ func main() {
 	// Server start hote hi CSV load karo
 	go func() {
 		log.Println("Loading CSV data from URL...")
-		if err := csvRepo.LoadFromURL(cfg.CSVURL); err != nil {
+		stocks, err := csvhandler.ParseCSV(cfg.CSVURL)
+		if err != nil {
 			log.Printf("CSV load error: %v", err)
-		} else {
-			log.Println("CSV data loaded successfully!")
+			return
 		}
+		inserted := 0
+		for _, stock := range stocks {
+			if err := csvRepo.UpsertStock(&stock); err != nil {
+				continue
+			}
+			inserted++
+		}
+		log.Printf("CSV loaded: %d stocks inserted/updated", inserted)
 	}()
 
 	// Router

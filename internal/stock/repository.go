@@ -17,7 +17,7 @@ func NewRepository(db *sql.DB) *Repository {
 func (r *Repository) Create(stock *models.Stock) error {
 	query := `
 		INSERT INTO stocks
-		(symbol, company_name, exchange, current_price)
+		(symbol, company_name, exchange, ltp)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id, last_updated
 	`
@@ -34,7 +34,7 @@ func (r *Repository) Create(stock *models.Stock) error {
 func (r *Repository) GetAll() ([]models.Stock, error) {
 	query := `
 		SELECT id, symbol, company_name, exchange,
-		       current_price, last_updated
+		       ltp, last_updated
 		FROM stocks
 		ORDER BY symbol
 	`
@@ -72,7 +72,7 @@ func (r *Repository) GetAll() ([]models.Stock, error) {
 func (r *Repository) GetByID(id string) (*models.Stock, error) {
 	query := `
 		SELECT id, symbol, company_name,
-		       exchange, current_price, last_updated
+		       exchange, ltp, last_updated
 		FROM stocks
 		WHERE id = $1
 	`
@@ -101,7 +101,7 @@ func (r *Repository) Update(id string, stock *models.Stock) error {
 		SET symbol = $1,
 		    company_name = $2,
 		    exchange = $3,
-		    current_price = $4,
+		    ltp = $4,
 		    last_updated = NOW()
 		WHERE id = $5
 		RETURNING last_updated
