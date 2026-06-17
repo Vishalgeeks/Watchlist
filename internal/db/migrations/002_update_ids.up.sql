@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS stocks (
     symbol        VARCHAR(20) UNIQUE NOT NULL,
     company_name  VARCHAR(255) NOT NULL,
     exchange      VARCHAR(50),
-    current_price DECIMAL(12,2) DEFAULT 0.00,
+    LTP DECIMAL(12,2) DEFAULT 0.00,
     last_updated  TIMESTAMP DEFAULT NOW()
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS watchlist_items (
 -- Sample Data
 INSERT INTO users (name) VALUES ('Vish'), ('Rahul');
 
-INSERT INTO stocks (symbol, company_name, exchange, current_price) VALUES
+INSERT INTO stocks (symbol, company_name, exchange, LTP) VALUES
     ('RELIANCE',   'Reliance Industries Ltd',   'NSE', 2450.75),
     ('TCS',        'Tata Consultancy Services', 'NSE', 3820.50),
     ('INFY',       'Infosys Ltd',               'NSE', 1456.30),

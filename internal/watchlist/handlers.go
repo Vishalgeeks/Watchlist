@@ -16,6 +16,7 @@ func NewHandler(service *Service) *Handler {
 }
 
 // POST /api/watchlists
+// POST /api/watchlists
 func (h *Handler) Create(c *gin.Context) {
 	var req models.CreateWatchlistRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -26,7 +27,10 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	w, err := h.service.CreateWatchlist(req.UserID, req.Name)
+	// JWT se user_id lo — query param nahi
+	userID := c.GetInt("user_id")
+
+	w, err := h.service.CreateWatchlist(userID, req.Name)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.Response{
 			Success: false,
@@ -42,25 +46,9 @@ func (h *Handler) Create(c *gin.Context) {
 	})
 }
 
-// GET /api/watchlists?user_id=1
+// GET /api/watchlists
 func (h *Handler) GetAll(c *gin.Context) {
-	userIDStr := c.Query("user_id")
-	if userIDStr == "" {
-		c.JSON(http.StatusBadRequest, models.Response{
-			Success: false,
-			Message: "user_id required",
-		})
-		return
-	}
-
-	userID, err := ParseInt(userIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, models.Response{
-			Success: false,
-			Message: "invalid user_id",
-		})
-		return
-	}
+	userID := c.GetInt("user_id") // ← JWT se aata hai
 
 	watchlists, err := h.service.GetWatchlists(userID)
 	if err != nil {
@@ -82,33 +70,16 @@ func (h *Handler) GetAll(c *gin.Context) {
 	})
 }
 
-// DELETE /api/watchlists/:id?user_id=1
+// DELETE /api/watchlists/:id
 func (h *Handler) Delete(c *gin.Context) {
 	watchlistIDStr := c.Param("id")
-	userIDStr := c.Query("user_id")
-
-	if userIDStr == "" {
-		c.JSON(http.StatusBadRequest, models.Response{
-			Success: false,
-			Message: "user_id required",
-		})
-		return
-	}
+	userID := c.GetInt("user_id") // ← JWT se
 
 	watchlistID, err := ParseInt(watchlistIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.Response{
 			Success: false,
 			Message: "invalid watchlist id",
-		})
-		return
-	}
-
-	userID, err := ParseInt(userIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, models.Response{
-			Success: false,
-			Message: "invalid user_id",
 		})
 		return
 	}
@@ -141,33 +112,16 @@ func (h *Handler) Delete(c *gin.Context) {
 	})
 }
 
-// GET /api/watchlists/:id/stocks?user_id=1
+// GET /api/watchlists/:id/stocks
 func (h *Handler) GetStocks(c *gin.Context) {
 	watchlistIDStr := c.Param("id")
-	userIDStr := c.Query("user_id")
-
-	if userIDStr == "" {
-		c.JSON(http.StatusBadRequest, models.Response{
-			Success: false,
-			Message: "user_id required",
-		})
-		return
-	}
+	userID := c.GetInt("user_id") // ← JWT se
 
 	watchlistID, err := ParseInt(watchlistIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.Response{
 			Success: false,
 			Message: "invalid watchlist id",
-		})
-		return
-	}
-
-	userID, err := ParseInt(userIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, models.Response{
-			Success: false,
-			Message: "invalid user_id",
 		})
 		return
 	}
@@ -206,33 +160,16 @@ func (h *Handler) GetStocks(c *gin.Context) {
 	})
 }
 
-// POST /api/watchlists/:id/stocks?user_id=1
+// POST /api/watchlists/:id/stocks
 func (h *Handler) AddStock(c *gin.Context) {
 	watchlistIDStr := c.Param("id")
-	userIDStr := c.Query("user_id")
-
-	if userIDStr == "" {
-		c.JSON(http.StatusBadRequest, models.Response{
-			Success: false,
-			Message: "user_id required",
-		})
-		return
-	}
+	userID := c.GetInt("user_id") // ← JWT se
 
 	watchlistID, err := ParseInt(watchlistIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.Response{
 			Success: false,
 			Message: "invalid watchlist id",
-		})
-		return
-	}
-
-	userID, err := ParseInt(userIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, models.Response{
-			Success: false,
-			Message: "invalid user_id",
 		})
 		return
 	}
@@ -281,34 +218,17 @@ func (h *Handler) AddStock(c *gin.Context) {
 	})
 }
 
-// DELETE /api/watchlists/:id/stocks/:stockId?user_id=1
+// DELETE /api/watchlists/:id/stocks/:stockId
 func (h *Handler) RemoveStock(c *gin.Context) {
 	watchlistIDStr := c.Param("id")
 	stockIDStr := c.Param("stockId")
-	userIDStr := c.Query("user_id")
-
-	if userIDStr == "" {
-		c.JSON(http.StatusBadRequest, models.Response{
-			Success: false,
-			Message: "user_id required",
-		})
-		return
-	}
+	userID := c.GetInt("user_id") // ← JWT se
 
 	watchlistID, err := ParseInt(watchlistIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.Response{
 			Success: false,
 			Message: "invalid watchlist id",
-		})
-		return
-	}
-
-	userID, err := ParseInt(userIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, models.Response{
-			Success: false,
-			Message: "invalid user_id",
 		})
 		return
 	}

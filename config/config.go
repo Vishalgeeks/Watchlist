@@ -15,6 +15,8 @@ type Config struct {
 	DBPassword string
 	DBName     string
 	ServerPort string
+	JWTSecret  string
+	CSVURL     string
 }
 
 // agr .env file ni hoga to ye basis pe run krenge
@@ -29,6 +31,8 @@ func Load() *Config {
 		DBPassword: getEnv("DB_PASSWORD", ""),
 		DBName:     getEnv("DB_NAME", "watchlist_db"),
 		ServerPort: getEnv("SERVER_PORT", "8080"),
+		JWTSecret:  getEnv("JWT_SECRET", "secret"),
+		CSVURL:     getEnv("CSV_URL", ""),
 	}
 }
 
