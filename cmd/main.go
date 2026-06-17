@@ -12,6 +12,7 @@ import (
 	"watchlist-backend/internal/middleware"
 	"watchlist-backend/internal/stock"
 	"watchlist-backend/internal/watchlist"
+	"watchlist-backend/internal/watchlist/search"
 )
 
 func main() {
@@ -38,6 +39,11 @@ func main() {
 	// CSV
 	csvRepo := csvhandler.NewRepository(database)
 	csvHandler := csvhandler.NewHandler(csvRepo, cfg.CSVURL)
+
+	//search
+	searchRepo := search.NewRepository(database)
+	searchService := search.NewService(searchRepo)
+	searchHandler := search.NewHandler(searchService)
 
 	// Server start hote hi CSV load karo
 	go func() {
@@ -68,6 +74,7 @@ func main() {
 	})
 
 	api := r.Group("/api")
+	api.GET("/search/stocks", searchHandler.SearchStocks)
 
 	// Public Auth Routes
 	authRoutes := api.Group("/auth")
