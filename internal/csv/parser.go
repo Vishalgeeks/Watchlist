@@ -56,7 +56,7 @@ func ParseCSV(metaURL string) ([]models.Stock, error) {
 
 	// Step 3 — Format detect karo
 	var csvBody []byte
-
+	// yaha se hm error k liye detection code likhe th
 	// Gzip try karo
 	gzReader, err := gzip.NewReader(bytes.NewReader(rawBody))
 	if err == nil {
