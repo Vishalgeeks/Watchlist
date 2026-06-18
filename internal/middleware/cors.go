@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,10 +12,10 @@ func CORSMiddleware() gin.HandlerFunc {
 		fmt.Println("CORS Middleware Executed")
 
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		//c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set(
 			"Access-Control-Allow-Headers",
-			"Content-Type, Content-Length, Accept-Encoding, Authorization, X-CSRF-Token",
+			"Content-Type, Content-Length, Accept-Encoding, Authorization, X-CSRF-Token , ngrok-skip-browser-warning",
 		)
 		c.Writer.Header().Set(
 			"Access-Control-Allow-Methods",

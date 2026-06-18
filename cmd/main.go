@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -40,7 +42,7 @@ func main() {
 	csvRepo := csvhandler.NewRepository(database)
 	csvHandler := csvhandler.NewHandler(csvRepo, cfg.CSVURL)
 
-	//search
+	// Search
 	searchRepo := search.NewRepository(database)
 	searchService := search.NewService(searchRepo)
 	searchHandler := search.NewHandler(searchService)
@@ -54,8 +56,8 @@ func main() {
 			return
 		}
 		inserted := 0
-		for _, stock := range stocks {
-			if err := csvRepo.UpsertStock(&stock); err != nil {
+		for _, s := range stocks {
+			if err := csvRepo.UpsertStock(&s); err != nil {
 				continue
 			}
 			inserted++
@@ -73,7 +75,26 @@ func main() {
 		c.Status(204)
 	})
 
+	// ── api group pehle banao ──────────────────
 	api := r.Group("/api")
+
+	// Health check
+	api.GET("/health", func(c *gin.Context) {
+		if err := database.Ping(); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status": "error",
+				"db":     "disconnected",
+			})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"status":    "ok",
+			"db":        "connected",
+			"timestamp": time.Now(),
+		})
+	})
+
+	// Search
 	api.GET("/search/stocks", searchHandler.SearchStocks)
 
 	// Public Auth Routes
